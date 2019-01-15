@@ -8,6 +8,7 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
         <!-- Styles -->
         <style>
@@ -79,30 +80,38 @@
                 </div>
             @endif
 
-            <div class="content">
+            <div class="content" id="comments_app">
                 <div class="title m-b-md">
                     Comments
                 </div>
 
                 <div class="links">
-					{!! Form::open(['url' => '/comment']) !!}
+					{!! Form::open(['url' => '/comment', '@submit'=> 'submitComment']) !!}
+
+					<p v-if="errors.length">
+					  <b>Please correct the following error(s):</b>
+					  <ul>
+					    <li v-for="error in errors">[[ error ]]</li>
+					  </ul>
+					</p>
+
 					<div>
 					<?php
 					    //
 						echo Form::label('name', 'Your Name');
-						echo Form::text('name');
+						echo Form::text('name', '', ['v-model'=>'name']);
 					?>
 					</div>
 					<div>
 					<?php
 					
 						echo Form::label('comment', 'Your Comment');
-						echo Form::textarea('comment');
+						echo Form::textarea('comment', '', ['v-model'=>'comment']);
 					?>
 					</div>
 					<div>
 					<?php
-						echo Form::submit('Comment!');
+						echo Form::submit('Comment!', ['v-on:click' => 'submitComment']);
 					?>
 					</div>
 					
@@ -110,5 +119,37 @@
                 </div>
             </div>
         </div>
+		<script>
+			var comments = new Vue({
+				el: '#comments_app',
+				delimiters: ['[[', ']]'],
+				data: {
+					message: 'Hello!',
+					name: '',
+					comment: '',
+					errors: []
+				},
+				methods: {
+					submitComment: function(e) {
+						if(this.name && this.comment) {
+							console.log('validated .... sending ....');
+							return true;
+						}
+
+						this.errors = [];
+
+						if(!this.name) {
+							this.errors.push('Name required');
+						}
+						if(!this.comment) {
+							this.errors.push('Comment required');
+						}
+						e.preventDefault();
+					}
+				}
+			});
+		</script>
+
+
     </body>
 </html>
