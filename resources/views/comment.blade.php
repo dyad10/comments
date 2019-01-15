@@ -80,6 +80,14 @@
                 </div>
             @endif
 
+            <div class="content" id="displaycomments_app">
+				<p v-if="comments.length">
+					<ul> <li v-for="comment in comments">[[ comment ]]</li> </ul>
+				</p>
+				<p v-else>
+					There are no comments yet
+				</p>
+			</div>
             <div class="content" id="comments_app">
                 <div class="title m-b-md">
                     Comments
@@ -120,6 +128,14 @@
             </div>
         </div>
 		<script>
+			var displaycomments = new Vue({
+				el: '#displaycomments_app',
+				delimiters: ['[[', ']]'],
+				data: {
+					comments: [],
+				}
+			});
+
 			var comments = new Vue({
 				el: '#comments_app',
 				delimiters: ['[[', ']]'],
