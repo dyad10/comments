@@ -16,5 +16,8 @@ Route::get('/', function () {
 });
 
 Route::get('/comment', function () {
-    return view('comment');
+    $comments = App\Comment::getComments();
+    return view('comment', ['comments' => $comments]);
 });
+
+Route::post('/comment', 'Comments@saveComment');

@@ -9,6 +9,7 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 
         <!-- Styles -->
         <style>
@@ -82,7 +83,7 @@
 
             <div class="content" id="displaycomments_app">
 				<p v-if="comments.length">
-					<ul> <li v-for="comment in comments">[[ comment ]]</li> </ul>
+					<ul> <li v-for="comment in comments">[[ comment.name ]] : [[ comment.comment ]]</li> </ul>
 				</p>
 				<p v-else>
 					There are no comments yet
@@ -94,7 +95,7 @@
                 </div>
 
                 <div class="links">
-					{!! Form::open(['url' => '/comment', '@submit'=> 'submitComment']) !!}
+					{!! Form::open(['url' => '/comment', '@submit.prevent'=> 'submitComment']) !!}
 
 					<p v-if="errors.length">
 					  <b>Please correct the following error(s):</b>
@@ -132,7 +133,7 @@
 				el: '#displaycomments_app',
 				delimiters: ['[[', ']]'],
 				data: {
-					comments: [],
+					comments: {!! $comments !!}
 				}
 			});
 
@@ -147,9 +148,16 @@
 				},
 				methods: {
 					submitComment: function(e) {
+						e.preventDefault();
 						if(this.name && this.comment) {
 							console.log('validated .... sending ....');
-							return true;
+							var payload = {name: this.name, comment: this.comment};
+							axios.post('/comment', payload).then(function(data, status, request) {
+								this.response = data;
+							}).catch(function(data, status, request) {
+									console.log('error');
+									console.log(status);
+							});
 						}
 
 						this.errors = [];

@@ -3,10 +3,17 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class Comment extends Model
 {
     //
+
+	public static function getComments() {
+		$l1comments = Comment::whereNull('comment_id')->get();
+		$l2comments = Comment::whereIn('id', $l1comments)->get();
+		return $l1comments->toJson();
+	}
 	public function store(Request $request) {
 		// Validate data
 		//  Check for required fields
@@ -16,7 +23,7 @@ class Comment extends Model
 			$comment->name = $request->name;
 			$comment->comment = $request->comment;
 			$comment->comment_id = $request->comment_id;
-			$comment->save();
+			return $comment->save();
 		}
 		else {
 			// return exception
