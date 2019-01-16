@@ -13,24 +13,23 @@ class Comment extends Model
 
 	public static function getComments() {
 		$comments = [];
-		//for($depth=0; $depth < Comment::$maxdepth; $depth++) {
-			$l2comments = [];
-			foreach(Comment::whereNull('comment_id')->get() as $l1comment) {
-				$l1comment->level = 0;
-				$comments[] = $l1comment;
-				$l3comments = [];
-				foreach(Comment::whereIn('comment_id', $l1comment)->get() as $l2comment) {
-					$l2comment->level = 1;
-					$comments[] = $l2comment;
-					foreach(Comment::whereIn('comment_id', $l2comment)->get() as $l3comment) {
-						$l3comment->level = 2;
-						$comments[] = $l3comment;
-					}
+		foreach(Comment::whereIn('comment_id', array(0))->get() as $l1comment) {
+			$l1comment->level = 0;
+			$comments[] = $l1comment;
+
+			foreach(Comment::whereIn('comment_id', array($l1comment->id))->get() as $l2comment) {
+				$l2comment->level = 1;
+				$comments[] = $l2comment;
+
+				foreach(Comment::whereIn('comment_id', array($l2comment->id))->get() as $l3comment) {
+					$l3comment->level = 2;
+					$comments[] = $l3comment;
 				}
 			}
-		//}
+		}
 		return json_encode($comments);
 	}
+
 	public function store(Request $request) {
 		// Validate data
 		//  Check for required fields

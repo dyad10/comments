@@ -11,6 +11,10 @@
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+
+
         <!-- Styles -->
         <style>
             html, body {
@@ -81,13 +85,11 @@
                 </div>
             @endif
 
-            <div class="content" id="displaycomments_app">
-				<p v-if="comments.length">
-					<ul> <li v-for="comment in comments">[[ comment.name ]] : [[ comment.comment ]]</li> </ul>
-				</p>
-				<p v-else>
-					There are no comments yet
-				</p>
+            <div style="height:100%; overflow-y: auto" class="content" id="displaycomments_app">
+				<div v-for="comment in comments" v-bind:key="comment.id" v-bind:comment="comment.comment">
+					[[ comment.comment ]]
+					<p>[[comment.name]]<i class="fas fa-reply" v-on:click="replyTo(comment.id, comment.comment, comment.level)"></i></p>
+				</div>
 			</div>
             <div class="content" id="comments_app">
                 <div class="title m-b-md">
@@ -103,6 +105,10 @@
 					    <li v-for="error in errors">[[ error ]]</li>
 					  </ul>
 					</p>
+					<p v-if="originalComment">
+						Replying to: [[ originalComment ]]
+					</p>
+
 
 					<div>
 					<?php
@@ -129,11 +135,34 @@
             </div>
         </div>
 		<script>
+			//comment view
 			var displaycomments = new Vue({
 				el: '#displaycomments_app',
 				delimiters: ['[[', ']]'],
 				data: {
 					comments: {!! $comments !!}
+				},
+				methods: {
+					addComment: function(comment) {
+						this.comments.push(comment);
+						vm.$forceUpdate();
+						console.log(this.comments);
+					},
+					replyTo: function(comment_id, comment, level) {
+						if(level == 2) {
+							for(i = 0; i < displaycomments.comments.length; i++) {
+								if(displaycomments.comments[i].id == comment_id) {
+									comments.replyTo = displaycomments.comments[i].comment_id;
+								}
+							}
+						}
+						else {
+							comments.replyTo = comment_id;
+						}
+						comments.originalComment = comment;
+						comments.comment = '';
+						comments.name = '';
+					}
 				}
 			});
 
@@ -141,23 +170,29 @@
 				el: '#comments_app',
 				delimiters: ['[[', ']]'],
 				data: {
-					message: 'Hello!',
 					name: '',
 					comment: '',
-					errors: []
+					replyTo: 0,
+					errors: [],
+					originalComment: ''
 				},
 				methods: {
 					submitComment: function(e) {
 						e.preventDefault();
 						if(this.name && this.comment) {
 							console.log('validated .... sending ....');
-							var payload = {name: this.name, comment: this.comment};
+							var payload = {name: this.name, comment: this.comment, replyTo: this.replyTo };
 							axios.post('/comment', payload).then(function(data, status, request) {
 								this.response = data;
 							}).catch(function(data, status, request) {
 									console.log('error');
 									console.log(status);
 							});
+							// reinitialize all values
+							this.name = '';
+							this.comment = '';
+							this.replyTo = 0;
+							displaycomments.addComment(payload);
 						}
 
 						this.errors = [];

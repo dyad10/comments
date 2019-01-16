@@ -12,6 +12,7 @@ class Comments extends Controller
 		$comment = new Comment();
 		$comment->name = $request->input('name');
 		$comment->comment = $request->input('comment');
+		$comment->comment_id = $request->input('replyTo');
 		return $comment->save();
 	}
 
